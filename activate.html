@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TEKTAL — Activation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --tektal-yellow: #FEBD00;
+      --tektal-dark: #111111;
+      --tektal-gray: #F6F6F6;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[var(--tektal-gray)] text-[var(--tektal-dark)]">
+  <main class="min-h-screen flex items-center justify-center px-6">
+    <div class="w-full max-w-2xl">
+      <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <div class="bg-[var(--tektal-yellow)] px-8 py-10">
+          <h1 class="text-4xl md:text-5xl font-black tracking-wide text-[var(--tektal-dark)]">
+            TEKTAL
+          </h1>
+          <p class="mt-2 text-sm md:text-base text-[var(--tektal-dark)]/80">
+            Activation en cours
+          </p>
+        </div>
+
+        <div class="px-8 py-10">
+          <div id="status" class="text-lg font-semibold">
+            Vérification du lien...
+          </div>
+
+          <p id="detail" class="mt-3 text-[var(--tektal-dark)]/70 leading-relaxed"></p>
+
+          <div class="mt-8">
+            <a href="/" class="inline-flex items-center justify-center rounded-full border border-[var(--tektal-dark)]/10 px-6 py-3 font-semibold text-[var(--tektal-dark)] hover:bg-[var(--tektal-yellow)]/20 transition">
+              Retour
+            </a>
+          </div>
+        </div>
+      </div>
+      <p class="mt-6 text-center text-xs text-[var(--tektal-dark)]/50">
+        © TEKTAL — Sécurité & mobilité
+      </p>
+    </div>
+  </main>
+
+  <script>
+    const statusEl = document.getElementById("status");
+    const detailEl = document.getElementById("detail");
+
+    const params = new URLSearchParams(window.location.search);
+    const uid = params.get("uid");
+    const token = params.get("token");
+
+    async function activate() {
+      if (!uid || !token) {
+        statusEl.textContent = "Lien invalide";
+        detailEl.textContent = "Le lien d’activation est incomplet. Vérifie ton email.";
+        return;
+      }
+      try {
+        const res = await fetch("https://tektal-backend.onrender.com/api/auth/users/activation/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ uid, token })
+        });
+
+        if (res.status === 204) {
+          statusEl.textContent = "Compte activé";
+          detailEl.textContent = "Tu peux maintenant te connecter dans l’application mobile.";
+        } else {
+          const data = await res.json();
+          statusEl.textContent = "Activation échouée";
+          detailEl.textContent = JSON.stringify(data);
+        }
+      } catch (e) {
+        statusEl.textContent = "Erreur réseau";
+        detailEl.textContent = "Impossible de contacter le serveur. Réessaie plus tard.";
+      }
+    }
+
+    activate();
+  </script>
+</body>
+</html>
